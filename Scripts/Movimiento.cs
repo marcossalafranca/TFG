@@ -4,13 +4,14 @@ using System.Collections;
 public class Movimiento : MonoBehaviour {
 
 	//VARIABLES MOVIEMIENTO
-	public float velX = 0.03f;
-	public float movX;
-	public float posicionActual;
-	public bool mirandoDerecha;
+	public float velX;
+    float inputX;
+    float posIniIFin;
+
+    public bool mirandoDerecha;
 
 	//VARIABLES DE SALTO
-	public float fuerzaSalto = 110f;
+	public float fuerzaSalto;
 	public Transform pie;
 	public float radioPie = 0.08f;
 	public LayerMask suelo;
@@ -55,22 +56,25 @@ public class Movimiento : MonoBehaviour {
 	void FixedUpdate () {
 
 		//MOVIMIENTO HORIZONTAL
-		float inputX = Input.GetAxis ("Horizontal"); // Almacena el movimiento en el eje X
-		movX = transform.position.x + (inputX * velX);//movX será igual a mi posicion en X + el movimiento en el eje X * velX
-		posicionActual=movX;//almacena la posicion actual
+		inputX = Input.GetAxis ("Horizontal"); // Almacena el movimiento en el eje X
+		//movX = transform.position.x + (inputX * velX);//movX será igual a mi posicion en X + el movimiento en el eje X * velX
+		
 		if (!agachado && !mirarArriba) {//Si no estoy agachado y no estoy mirando arriba
-
+            transform.position += new Vector3(inputX *velX*Time.deltaTime,0,0);
+            //Restingir inicio fin mario en nivel
+            posIniIFin = Mathf.Clamp(transform.position.x, -11f, 85f);
+            transform.position = new Vector3(posIniIFin, transform.position.y,0);
 			if (inputX > 0) {//Si la velocidad en el eje X es mayor que 0
-				transform.position = new Vector3 (movX, transform.position.y, 0);//mi posicion = movX, la posicion que tenga en y, 0
+				//transform.position = new Vector3 (movX, transform.position.y, 0);//mi posicion = movX, la posicion que tenga en y, 0
 				transform.localScale = new Vector3 (1, 1, 1);//la escala original si me muevo a la derecha
-				mirandoDerecha = true;//establece que estoy mirando a la derecha
+				//mirandoDerecha = true;//establece que estoy mirando a la derecha
 				
 			}
 
 			if (inputX < 0) {//Si la velocidad en el eje X es menor que 0
-				transform.position = new Vector3 (movX, transform.position.y, 0);//mi posicion = movX, la posicion que tenga en y, 0
+				//transform.position = new Vector3 (movX, transform.position.y, 0);//mi posicion = movX, la posicion que tenga en y, 0
 				transform.localScale = new Vector3 (-1, 1, 1);//la escala inversa si me muevo a la izquierda
-				mirandoDerecha = false;//Establece que no estoy mirando a la derecha
+				//mirandoDerecha = false;//Establece que no estoy mirando a la derecha
 				
 			}
 		}
@@ -132,11 +136,11 @@ public class Movimiento : MonoBehaviour {
 		if (inputX != 0) {//Si me estoy moviendo
 			if (Input.GetKey (KeyCode.X)) {//y pulso X
 				run = true;//Establezco que estoy corriendo
-				velX = 0.06f;//Establezco que velX ahora vale 0.06
+				velX = 4f;//Establezco que velX ahora vale 0.06
 				animator.SetBool ("run",true);//Le digo al animador que estoy corriendo
 
 			} else {//Si me estoy moviendo pero no pulso X
-				velX = 0.03f;//Establezco que velX vale 0.03
+				velX = 2f;//Establezco que velX vale 0.03
 				run = false;// Establezco que no estoy corriendo
 				animator.SetBool ("run",false);	//Le digo al animador que no estoy corriendo
 				
