@@ -192,12 +192,12 @@ public class Movimiento : MonoBehaviour {
 			
 		}
         
-                //SUPERSALTO
+                //SALTO RUN
                 if (inputX != 0) {
                 //Si me estoy moviendo
                     if (run && Input.GetKeyDown(KeyCode.C))
                     {//Si turbo está activado y pulso C
-                        animator.SetBool("enSuelo", false);//Le digo al animador que active turbosalto
+                        animator.SetBool("enSuelo", false);//Le digo al animador que active salto
                     }
                 }
 
