@@ -3,6 +3,10 @@ using System.Collections;
 
 public class Movimiento : MonoBehaviour {
 
+
+
+    public GameObject goblin;
+
 	//VARIABLES MOVIEMIENTO
 	public float velX;
     float inputX;
@@ -45,15 +49,44 @@ public class Movimiento : MonoBehaviour {
         spr = GetComponent<SpriteRenderer>();
     }
 
+    //GOLPEAR GOBLIN
+    public bool GoblinGolpeado;
+    Color alpha;
+    Color goblinAlpha;
+
+    public GameObject[] allObjets;
+    public GameObject[] enemigo;
+
+    //VARIABLE MUERTE
+    public CircleCollider2D colliderMuertegoblin;
+    public CircleCollider2D colliderMuertePie;
+    public bool GoblimMuerte;
+    public int estadoGoblin;
+
+    // Use this for initialization
+    void Start () {
+       
+    }
+    void Update() {
+
+       
+
+        /* if (GoblinGolpeado){
+                StartCoroutine(Golpeado());
+                GoblinGolpeado = false;
+
+            }*/
+        if (GoblimMuerte && estadoGoblin != 2){
 
 
-	// Use this for initialization
-	void Start () {
-        
+            StartCoroutine(Muerte ());
+        }
     }
 
-	// FixUpdate is called once 0.02 seconds each frame (This can be modified in edit > Project Settings > Time > Fixed Timestep)
-	void FixedUpdate () {
+
+
+    // FixUpdate is called once 0.02 seconds each frame (This can be modified in edit > Project Settings > Time > Fixed Timestep)
+    void FixedUpdate () {
 
 		//MOVIMIENTO HORIZONTAL
 		inputX = Input.GetAxis ("Horizontal"); // Almacena el movimiento en el eje X
@@ -61,9 +94,11 @@ public class Movimiento : MonoBehaviour {
 		
 		if (!agachado && !mirarArriba) {//Si no estoy agachado y no estoy mirando arriba
             transform.position += new Vector3(inputX *velX*Time.deltaTime,0,0);
-            //Restingir inicio fin mario en nivel
-            posIniIFin = Mathf.Clamp(transform.position.x, -11f, 85f);
+
+            //Restingir inicio fin Goblin en nivel
+            posIniIFin = Mathf.Clamp(transform.position.x, -10f, 85f);
             transform.position = new Vector3(posIniIFin, transform.position.y,0);
+
 			if (inputX > 0) {//Si la velocidad en el eje X es mayor que 0
 				//transform.position = new Vector3 (movX, transform.position.y, 0);//mi posicion = movX, la posicion que tenga en y, 0
 				transform.localScale = new Vector3 (1, 1, 1);//la escala original si me muevo a la derecha
@@ -91,14 +126,16 @@ public class Movimiento : MonoBehaviour {
 
 		if (enSuelo) {//Si estoy en el suelo
 			animator.SetBool ("enSuelo", true);//Le digo al animador que estoy en el suelo
-			
-			if(Input.GetKeyDown(KeyCode.C) && !agachado){//Si pulso la tecla C y no estoy agachado
+           // animator.SetBool("supersalto", false);
+
+            if (Input.GetKeyDown(KeyCode.C) && !agachado){//Si pulso la tecla C y no estoy agachado
 				GetComponent<Rigidbody2D>().AddForce (new Vector2 (0,fuerzaSalto));//Accedo a la velocidad del Rigidbody2D y le añado la fuerza vertical establecida en fuerzaSalto
 				animator.SetBool ("enSuelo",false);//Le digo al animador que no estoy en el suelo
 			}
 
-		} else {
-			animator.SetBool ("enSuelo", false);//Le digo al animador que no estoy en el suelo
+		}
+        if (!enSuelo){//Si no estoy en el suelo
+            animator.SetBool ("enSuelo", false);//Le digo al animador que no estoy en el suelo
 		}
 
 		//AGACHARSE
@@ -139,7 +176,9 @@ public class Movimiento : MonoBehaviour {
 				velX = 4f;//Establezco que velX ahora vale 0.06
 				animator.SetBool ("run",true);//Le digo al animador que estoy corriendo
 
-			} else {//Si me estoy moviendo pero no pulso X
+			}
+            if (!Input.GetKey(KeyCode.X))
+            {//Si me estoy moviendo pero no pulso X
 				velX = 2f;//Establezco que velX vale 0.03
 				run = false;// Establezco que no estoy corriendo
 				animator.SetBool ("run",false);	//Le digo al animador que no estoy corriendo
@@ -152,15 +191,48 @@ public class Movimiento : MonoBehaviour {
 			animator.SetBool ("run",false);
 			
 		}
-
-		
         
+                //SUPERSALTO
+                if (inputX != 0) {
+                //Si me estoy moviendo
+                    if (run && Input.GetKeyDown(KeyCode.C))
+                    {//Si turbo está activado y pulso C
+                        animator.SetBool("enSuelo", false);//Le digo al animador que active turbosalto
+                    }
+                }
+
+                
+
+    }
+
+    /*  public IEnumerator Golpeado()
+      {
+          for(int i=0; i<=5; i++){
+              yield return new WaitForSeconds(0.1f);
+              alpha = new Color(1f, 1f, 1f, 0);
+              goblinAlpha = goblin.GetComponent <SpriteRenderer>().color = alpha;
+
+              yield return new WaitForSeconds(0.1f);
+              alpha = new Color(1f, 1f, 1f, 1);
+              goblinAlpha = goblin.GetComponent<SpriteRenderer>().color = alpha;
+          }
+          StopCoroutine(Golpeado());
+      }*/
+
+    public IEnumerator Muerte(){
+        estadoGoblin = 2;
+        animator.SetBool("muerte",true);
+
+        rb.isKinematic = true;
+        colliderMuertegoblin.isTrigger = true;
+        colliderMuertePie.isTrigger = true;
+        rb.velocity = Vector2.zero;
+        yield return new WaitForSeconds(0.3f);
+        rb.isKinematic = false;
+        rb.velocity = new Vector2(0, 8f);
+        yield return new WaitForSeconds(0.5f);
+        rb.velocity = Vector2.zero;
+    }
 
 
-	}
-	
-
-	
-
-    
 }
