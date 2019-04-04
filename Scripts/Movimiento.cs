@@ -24,9 +24,10 @@ public class Movimiento : MonoBehaviour {
 
 	//VARIABLES AGACHADO
 	public bool agachado;
+   
 
-	//VARIABLES MIRAR ARRIBA
-	public bool mirarArriba; 
+    //VARIABLES MIRAR ARRIBA
+    public bool mirarArriba; 
 
 	//VARIABLES CAIDA
 	public float caida;
@@ -43,12 +44,14 @@ public class Movimiento : MonoBehaviour {
 
     Animator animator;
 
-	void Awake(){
-		animator = GetComponent <Animator>();
-		rb = GetComponent <Rigidbody2D> ();
+    void Awake()
+    {
+        animator = GetComponent<Animator>();
+        rb = GetComponent<Rigidbody2D>();
         spr = GetComponent<SpriteRenderer>();
-    }
+      
 
+    }
     //GOLPEAR GOBLIN
     public bool GoblinGolpeado;
     Color alpha;
@@ -60,16 +63,47 @@ public class Movimiento : MonoBehaviour {
     //VARIABLE MUERTE
     public CircleCollider2D colliderMuertegoblin;
     public CircleCollider2D colliderMuertePie;
+    
     public bool GoblimMuerte;
     public int estadoGoblin;
 
     // Use this for initialization
     void Start () {
        
+
+
     }
     void Update() {
 
-       
+
+
+        //SALTO    metido aqui para que no de fallo al salto
+        if (enSuelo)
+        {//Si estoy en el suelo
+
+            animator.SetBool("enSuelo", true);//Le digo al animador que estoy en el suelo
+                                              // animator.SetBool("supersalto", false);
+
+            if (Input.GetKeyDown(KeyCode.C) && !agachado && !run)
+            {//Si pulso la tecla C y no estoy agachado y no run
+
+                GetComponent<Rigidbody2D>().AddForce(new Vector2(0, fuerzaSalto));//Accedo a la velocidad del Rigidbody2D y le añado la fuerza vertical establecida en fuerzaSalto
+                animator.SetBool("enSuelo", false);//Le digo al animador que no estoy en el suelo
+            }
+
+            if (Input.GetKeyDown(KeyCode.C) && !agachado && run)
+            {//Si pulso la tecla C y no estoy agachado y run
+
+                GetComponent<Rigidbody2D>().AddForce(new Vector2(0, fuerzaSalto));//Accedo a la velocidad del Rigidbody2D y le añado la fuerza vertical establecida en fuerzaSalto
+                animator.SetBool("enSuelo", false);//Le digo al animador que no estoy en el suelo
+            }
+
+        }
+        else
+        {//Si no estoy en el suelo
+            animator.SetBool("enSuelo", false);//Le digo al animador que no estoy en el suelo
+        }
+
 
         /* if (GoblinGolpeado){
                 StartCoroutine(Golpeado());
@@ -96,7 +130,7 @@ public class Movimiento : MonoBehaviour {
             transform.position += new Vector3(inputX *velX*Time.deltaTime,0,0);
 
             //Restingir inicio fin Goblin en nivel
-            posIniIFin = Mathf.Clamp(transform.position.x, -10f, 85f);
+            posIniIFin = Mathf.Clamp(transform.position.x, -9.9f, 85f);
             transform.position = new Vector3(posIniIFin, transform.position.y,0);
 
 			if (inputX > 0) {//Si la velocidad en el eje X es mayor que 0
@@ -124,32 +158,42 @@ public class Movimiento : MonoBehaviour {
 
 		enSuelo = Physics2D.OverlapCircle (pie.position, radioPie, suelo);// Si estoy tocando el suelo enSuelo será true
 
-		if (enSuelo) {//Si estoy en el suelo
-			animator.SetBool ("enSuelo", true);//Le digo al animador que estoy en el suelo
-           // animator.SetBool("supersalto", false);
-
-            if (Input.GetKeyDown(KeyCode.C) && !agachado){//Si pulso la tecla C y no estoy agachado
-				GetComponent<Rigidbody2D>().AddForce (new Vector2 (0,fuerzaSalto));//Accedo a la velocidad del Rigidbody2D y le añado la fuerza vertical establecida en fuerzaSalto
-				animator.SetBool ("enSuelo",false);//Le digo al animador que no estoy en el suelo
-			}
-
-		}
-        if (!enSuelo){//Si no estoy en el suelo
-            animator.SetBool ("enSuelo", false);//Le digo al animador que no estoy en el suelo
-		}
 
 		//AGACHARSE
 
 		if (enSuelo && Input.GetKey (KeyCode.DownArrow)) {//Si estoy en el suelo y pulso abajo
-			agachado = true;//Establece que estoy agachado
-			animator.SetBool ("agachado", true);//Le digo al animador que estoy agachado
-		} else {
-			agachado = false;//Establece que no estoy agachado
-			animator.SetBool ("agachado",false);//Le digo al animador que no estoy agachado
-		}
 
-		//MIRAR ARRIBA
-		if (inputX == 0) {//Si no me muevo
+			agachado = true;//Establece que estoy agachado
+            animator.SetBool("agachado", true);//Le digo al animador que estoy agachado
+
+            //circleP.GetComponent<CircleCollider2D>().enabled = false;  //Borra el collider 
+            //modificar radio y posicion del circlecollider
+            gameObject.GetComponent<CircleCollider2D>().offset = new Vector2(0f,0.16f);
+            gameObject.GetComponent<CircleCollider2D>().radius=0.15f;
+
+           
+
+        } else {
+            //circleP.GetComponent<CircleCollider2D>().enabled = true;  //devuelve el collider
+
+            if (Input.GetKeyUp(KeyCode.DownArrow)){ //Volver collider a normal al soltar boton
+            
+                gameObject.GetComponent<CircleCollider2D>().offset = new Vector2(0.03853655f, 0.2803588f);
+                gameObject.GetComponent<CircleCollider2D>().radius = 0.2048309f;
+            }
+
+            agachado = false;//Establece que no estoy agachado
+			animator.SetBool ("agachado",false);//Le digo al animador que no estoy agachado
+            //volver ciclecollider a forma normal
+
+            
+        }
+
+        
+
+
+        //MIRAR ARRIBA
+        if (inputX == 0) {//Si no me muevo
 			if (enSuelo && Input.GetKey (KeyCode.UpArrow)) {//Si estoy en el suelo y pulso arrba
 				mirarArriba = true;//Establece que estoy mirando arriba
 				animator.SetBool ("mirarArriba", true);//Le digo al animador que estoy mirando arriba
@@ -171,14 +215,15 @@ public class Movimiento : MonoBehaviour {
 		//CORRER
 
 		if (inputX != 0) {//Si me estoy moviendo
+
 			if (Input.GetKey (KeyCode.X)) {//y pulso X
 				run = true;//Establezco que estoy corriendo
 				velX = 4f;//Establezco que velX ahora vale 0.06
 				animator.SetBool ("run",true);//Le digo al animador que estoy corriendo
 
 			}
-            if (!Input.GetKey(KeyCode.X))
-            {//Si me estoy moviendo pero no pulso X
+
+            if (!Input.GetKey(KeyCode.X)){//Si me estoy moviendo pero no pulso X
 				velX = 2f;//Establezco que velX vale 0.03
 				run = false;// Establezco que no estoy corriendo
 				animator.SetBool ("run",false);	//Le digo al animador que no estoy corriendo
@@ -192,15 +237,15 @@ public class Movimiento : MonoBehaviour {
 			
 		}
         
-                //SALTO RUN
+       /*         //SALTORUN
                 if (inputX != 0) {
                 //Si me estoy moviendo
                     if (run && Input.GetKeyDown(KeyCode.C))
                     {//Si turbo está activado y pulso C
-                        animator.SetBool("enSuelo", false);//Le digo al animador que active salto
+                        animator.SetBool("enSuelo", false);//Le digo al animador que active saltorun
                     }
                 }
-
+                */
                 
 
     }
@@ -220,18 +265,32 @@ public class Movimiento : MonoBehaviour {
       }*/
 
     public IEnumerator Muerte(){
-        estadoGoblin = 2;
+        //estadoGoblin = 2;
         animator.SetBool("muerte",true);
+        velX = 0;
 
-        rb.isKinematic = true;
+       // rb.isKinematic = true;    //no le afecta la gravedad
         colliderMuertegoblin.isTrigger = true;
         colliderMuertePie.isTrigger = true;
-        rb.velocity = Vector2.zero;
-        yield return new WaitForSeconds(0.3f);
-        rb.isKinematic = false;
-        rb.velocity = new Vector2(0, 8f);
-        yield return new WaitForSeconds(0.5f);
-        rb.velocity = Vector2.zero;
+        rb.velocity =    new Vector2(0, 3f);
+
+        yield return new WaitForSeconds(0.2f);
+
+             
+        rb.velocity = new Vector2(0, -5f);
+        yield return new WaitForSeconds(0.8f);
+        //rb.velocity = Vector2.zero;
+        //rb.isKinematic = false;//le afecta la gravedad
+
+        //Restablecer goblin inicio
+        velX = 2;
+        GoblimMuerte = false;
+        colliderMuertegoblin.isTrigger = false;
+        colliderMuertePie.isTrigger = false;
+        transform.position = new Vector3(-9.9f, -4.34191f, 0);
+        animator.SetBool("muerte", false);
+
+
     }
 
 
